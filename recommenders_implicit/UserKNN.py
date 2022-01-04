@@ -97,15 +97,12 @@ class UserKNN(Model):
             if v != u:
                 self.user_freq.Increment(u, v)
 
+        f_u = self.user_freq.Get(u, u)
         for v in range(self.data.maxuserid + 1):
             if v != u:
                 f_uv = self.user_freq.Get(u, v)
-                f_u = self.user_freq.Get(u, u)
                 f_v = self.user_freq.Get(v, v)
                 if f_uv: 
-                    if not f_v:
-                        print(str(u) + "-" + str(v))
-
                     # Cosine
                     sim = f_uv / np.sqrt(f_u ** 2 * f_v ** 2)
                 else:
@@ -169,7 +166,7 @@ class UserKNN(Model):
         recs = [[i, self.Predict(user_eid, i, False)] for i in self.data.itemset]
 
         if exclude_known_items:
-            user_items = self.data.GetUserItems(user_id, False)
+            user_items = self.data.GetUserItems(user_id)
             recs = np.delete(recs, user_items, 0)
 
         if sort_list:
