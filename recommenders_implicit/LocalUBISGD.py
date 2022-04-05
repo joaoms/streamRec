@@ -7,23 +7,32 @@ from .BISGD import BISGD
 from .ISGD import ISGD
 
 class LocalUBISGD(BISGD):
-    def __init__(self, data: ImplicitData, num_factors: int = 10, num_iterations: int = 10, num_nodes: int = 8, learn_rate: float = 0.01, u_regularization: float = 0.1, i_regularization: float = 0.1, random_seed: int = 1):
+    def __init__(self, data: ImplicitData, 
+        num_clusters: int = 10, cl_num_iterations: int = 10, cl_learn_rate: float = 0.01, cl_regularization: float = 0.1,         
+        num_factors: int = 10, num_iterations: int = 10, learn_rate: float = 0.01, regularization: float = 0.1, 
+        random_seed: int = 1):
         """    Constructor.
 
         Keyword arguments:
         data -- ImplicitData object
+        num_clusters -- Number of clusters (int, default 10)
+        cl_num_iterations -- Number of iterations of the clustering algorithm (int, default 10)
+        cl_learn_rate -- Learn rate of the clustering algorithm (float, default 0.1)
+        cl_regularization -- Regularization factor of the clustering algorithm (float, default 0.1)
         num_factors -- Number of latent features (int, default 10)
         num_iterations -- Maximum number of iterations (int, default 10)
-        num_nodes -- Number of 'weak' learners (int, default 8)
         learn_rate -- Learn rate, aka step size (float, default 0.01)
         regularization -- Regularization factor (float, default 0.01)
         random_seed -- Random seed (int, default 1)"""
 
-        super().__init__(data, num_factors, num_iterations, num_nodes, learn_rate, u_regularization, i_regularization, random_seed)
+        self.cl_num_iterations = cl_num_iterations
+        self.cl_learn_rate = cl_learn_rate
+        self.cl_regularization = cl_regularization
+
+        super().__init__(data, num_factors, num_iterations, num_clusters, learn_rate, regularization, regularization, random_seed)
 
     def _InitModel(self):
         super()._InitModel()
-        #self.metamodel = ISGD(self.data, self.num_nodes, self.num_iterations, self.learn_rate, self.user_regularization, self.item_regularization, random_seed=self.random_seed)
         self.metamodel_users = [np.abs(np.random.normal(0.0, 0.1, self.num_nodes)) for _ in range(self.data.maxuserid + 1)]
         self.metamodel_items = [np.abs(np.random.normal(0.0, 0.1, self.num_nodes)) for _ in range(self.data.maxuserid + 1)]
 
@@ -38,8 +47,6 @@ class LocalUBISGD(BISGD):
         """
 
         user_id, item_id = self.data.AddFeedback(user, item)
-
-        #self.metamodel.IncrTrain(user, item)
 
         if len(self.user_factors[0]) == self.data.maxuserid:
             self.metamodel_users.append(np.abs(np.random.normal(0.0, 0.1, self.num_nodes)))
@@ -59,16 +66,16 @@ class LocalUBISGD(BISGD):
     def _UpdateFactorsMeta(self, user_id, item_id, update_users: bool = True, update_items: bool = True, target: int = 1):
         p_u = self.metamodel_users[user_id]
         q_i = self.metamodel_items[item_id]
-        for _ in range(int(self.num_iterations)):
+        for _ in range(int(self.cl_num_iterations)):
             err = target - np.inner(p_u, q_i)
 
             if update_users:
-                delta = self.learn_rate * (err * q_i - self.user_regularization * p_u)
+                delta = self.cl_learn_rate * (err * q_i - self.cl_regularization * p_u)
                 p_u += delta
                 p_u[p_u<0] = 0.0
 
             if update_items:
-                delta = self.learn_rate * (err * p_u - self.item_regularization * q_i)
+                delta = self.cl_learn_rate * (err * p_u - self.cl_regularization * q_i)
                 q_i += delta
                 q_i[q_i<0] = 0.0
 
