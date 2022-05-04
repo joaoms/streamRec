@@ -14,6 +14,12 @@ class RSISGD(ISGD):
     def IncrTrain(self, user, item, update_users: bool = True, update_items: bool = True):
         user_id, item_id = self.data.AddFeedback(user, item)
 
+        if len(self.user_factors) == self.data.maxuserid:
+            self.user_factors.append(np.random.normal(0.0, 0.1, self.num_factors))
+        if len(self.item_factors) == self.data.maxitemid:
+            self.item_factors.append(np.random.normal(0.0, 0.1, self.num_factors))
+
+
         user_items = self.data.GetUserItems(user_id)
         for _ in range(self.ra_length):
             negative_item_id = random.choice(self.data.items)
@@ -21,3 +27,5 @@ class RSISGD(ISGD):
                 negative_item_id = random.choice(self.data.items)
 
             self._UpdateFactors(user_id, negative_item_id, target = 0)
+        
+        self._UpdateFactors(user_id, item_id)
