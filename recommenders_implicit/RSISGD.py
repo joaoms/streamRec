@@ -22,7 +22,7 @@ class RSISGD(ISGD):
 
         user_items = self.data.GetUserItems(user_id)
         for _ in range(self.ra_length):
-            negative_item_id = random.choice(self.data.itemset)
+            negative_item_id = random.choice(1 + range(self.data.maxitemid))
             while negative_item_id in user_items:
                 negative_item_id = random.choice(self.data.itemset)
 
