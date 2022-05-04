@@ -22,9 +22,9 @@ class RSISGD(ISGD):
 
         user_items = self.data.GetUserItems(user_id)
         for _ in range(self.ra_length):
-            negative_item_id = random.choice(self.data.items)
+            negative_item_id = random.choice(self.data.itemset)
             while negative_item_id in user_items:
-                negative_item_id = random.choice(self.data.items)
+                negative_item_id = random.choice(self.data.itemset)
 
             self._UpdateFactors(user_id, negative_item_id, True, False, 0)
         
