@@ -28,10 +28,11 @@ class RAISGD(ISGD):
             self.itemqueue.remove(item_id)
 
 
-        for _ in range(self.ra_length):
-            last = self.itemqueue.pop(0)
-            self._UpdateFactors(user_id, last, True, False, 0)
-            self.itemqueue.append(last)
+        if len(self.itemqueue):
+            for _ in range(self.ra_length):
+                last = self.itemqueue.pop(0)
+                self._UpdateFactors(user_id, last, True, False, 0)
+                self.itemqueue.append(last)
 
         self._UpdateFactors(user_id, item_id)
         self.itemqueue.append(item_id)
