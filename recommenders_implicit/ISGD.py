@@ -122,10 +122,11 @@ class ISGD(Model):
             user_items = self.data.GetUserItems(user_id)
             recs = np.delete(recs, user_items, 0)
 
-        if sort_list:
-            recs = recs[np.argsort(recs[:, 1], kind = 'heapsort')]
-
         if n == -1 or n > len(recs) :
             n = len(recs)
+        else:
+            recs = recs[np.argpartition(recs[:,1], n-1)[:n]]
 
-        return recs[:n]
+        recs = recs[np.argsort(recs[:,1])]
+
+        return recs
