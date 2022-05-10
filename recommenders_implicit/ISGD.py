@@ -97,7 +97,7 @@ class ISGD(Model):
         """
         return np.inner(self.user_factors[user_id], self.item_factors[item_id])
 
-    def Recommend(self, user, n: int = -1, exclude_known_items: bool = True, sort_list: bool = True):
+    def Recommend(self, user, n: int = -1, exclude_known_items: bool = True, sort_list: bool = True, default_user: str = 'none'):
         """
         Returns an list of tuples in the form (item_id, score), ordered by score.
 
@@ -106,19 +106,27 @@ class ISGD(Model):
         item_id -- The ID of the item
         """
 
+        recs = []
+
         user_id = self.data.GetUserInternalId(user)
 
         if user_id == -1:
-            return []
-
-        recs = []
-
-        p_u = self.user_factors[user_id]
+            if default_user == 'random':
+                p_u = np.random.normal(0.0, 0.1, self.num_factors)
+            if default_user == 'average':
+                p_u = np.mean(self.user_factors, axis=0)
+            if default_user == 'median':
+                p_u = np.median(self.user_factors, axis=0)
+            else: # none
+                return []
+        else:
+            p_u = self.user_factors[user_id]
+        
         scores = np.abs(1 - np.inner(p_u, self.item_factors))
 
         recs = np.column_stack((self.data.itemset, scores))
 
-        if exclude_known_items:
+        if exclude_known_items and user_id != -1:
             user_items = self.data.GetUserItems(user_id)
             recs = np.delete(recs, user_items, 0)
 
