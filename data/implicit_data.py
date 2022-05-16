@@ -78,6 +78,12 @@ class ImplicitData:
         if len(item_id):
             return item_id[0]
         return -1
+    
+    def GetItemInternalIds(self, items:set):
+        item_ids, = np.where(np.isin(self.itemset, items))
+        if len(item_ids):
+            return item_ids
+        return []
 
     def GetUserExternalId(self, user_id:int):
         if user_id > -1 and user_id <= self.maxuserid:

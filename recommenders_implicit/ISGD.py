@@ -97,7 +97,7 @@ class ISGD(Model):
         """
         return np.inner(self.user_factors[user_id], self.item_factors[item_id])
 
-    def Recommend(self, user, n: int = -1, exclude_known_items: bool = True, sort_list: bool = True, default_user: str = 'none'):
+    def Recommend(self, user, n: int = -1, exclude_known_items: bool = True, candidates: set = {}, default_user: str = 'none'):
         """
         Returns an list of tuples in the form (item_id, score), ordered by score.
 
@@ -129,6 +129,12 @@ class ISGD(Model):
         if exclude_known_items and user_id != -1:
             user_items = self.data.GetUserItems(user_id)
             recs = np.delete(recs, user_items, 0)
+
+        if len(candidates):
+            # TODO: testar código
+            candidates_internal = self.data.GetItemInternalIds(candidates)
+            condition = np.isin(recs[:,0].astype(int), candidates_internal)
+            recs = recs[condition]
 
         if n == -1 or n > len(recs) :
             n = len(recs)
