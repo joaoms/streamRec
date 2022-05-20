@@ -46,13 +46,13 @@ class ImplicitData:
         self.size = self.size + 1
         self.userlist.append(user)
         self.itemlist.append(item)
-        if user not in self.userset:
+        if not np.isin(user, self.userset, True):
             self.userset = np.append(self.userset, user)
             self.maxuserid = self.maxuserid + 1
             self.useritems.append([])
         user_id = self.GetUserInternalId(user)
         self.userindices = np.append(self.userindices, user_id)
-        if item not in self.itemset:
+        if not np.isin(item, self.itemset, True):
             self.itemset = np.append(self.itemset, item)
             self.maxitemid = self.maxitemid + 1
             self.itemusers.append([])

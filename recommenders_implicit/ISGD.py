@@ -131,9 +131,7 @@ class ISGD(Model):
             recs = np.delete(recs, user_items, 0)
 
         if len(candidates):
-            # TODO: testar código
-            candidates_internal = self.data.GetItemInternalIds(candidates)
-            condition = np.isin(recs[:,0].astype(int), candidates_internal)
+            condition = np.isin(recs[:,0], candidates)
             recs = recs[condition]
 
         if n == -1 or n > len(recs) :
